@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Site</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🛍️ ShopMart</div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/shop">Shop</a>
+            <a href="/cart">Cart (<span id="cartCount">0</span>)</a>
+        </div>
+    </nav>
+
+    <% if (orderSuccess) { %>
+        <div class="alert success">
+            ✅ Thank you <%= customerName %>! Your order has been placed!
+        </div>
+    <% } %>
+
+    <div class="hero">
+        <h1>Welcome to ShopMart</h1>
+        <p>Best products at best prices</p>
+        <a href="/shop" class="btn-primary">Shop Now</a>
+    </div>
+
+    <div class="container">
+        <h2>Featured Products</h2>
+        <div class="product-grid">
+            <% products.forEach(product => { %>
+            <div class="product-card">
+                <div class="product-img"><%= product.image %></div>
+                <h3><%= product.name %></h3>
+                <p class="price">$<%= product.price %></p>
+                <form method="POST" action="/add-to-cart">
+                    <input type="hidden" name="id" value="<%= product.id %>">
+                    <input type="hidden" name="name" value="<%= product.name %>">
+                    <input type="hidden" name="price" value="<%= product.price %>">
+                    <button type="submit" class="btn-add">Add to Cart</button>
+                </form>
+            </div>
+            <% }); %>
+        </div>
+    </div>
+
+    <% if (showCheckout && cart && cart.length > 0) { %>
+    <div class="modal-overlay">
+        <div class="checkout-modal">
+            <h2>Checkout</h2>
+            <div class="order-items">
+                <% cart.forEach(item => { %>
+                <div class="order-item">
+                    <span><%= item.name %> x<%= item.quantity %></span>
+                    <span>$<%= (item.price * item.quantity).toFixed(2) %></span>
+                </div>
+                <% }); %>
+                <div class="order-total">Total: $<%= cartTotal %></div>
+            </div>
+            <form method="POST" action="/checkout">
+                <input type="text" name="name" placeholder="Full Name" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="text" name="address" placeholder="Address" required>
+                <button type="submit" class="btn-primary">Place Order</button>
+                <a href="/shop" class="btn-secondary">Continue Shopping</a>
+            </form>
+        </div>
+    </div>
+    <% } %>
+
+    <footer>
+        <p>&copy; 2024 ShopMart</p>
+    </footer>
+
+    <script>
+        // Update cart count from API
+        fetch('/api/cart-count')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('cartCount').innerText = data.count || 0;
+            })
+            .catch(err => console.log('Error fetching cart count:', err));
+    </script>
+</body>
+</html>
