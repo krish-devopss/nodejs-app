@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop - All Products</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🛍️ ShopMart</div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/shop">Shop</a>
+            <a href="/cart">Cart (<span id="cartCount">0</span>)</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="shop-header">
+            <h1>All Products</h1>
+            <div class="filters">
+                <a href="/shop?category=all" class="filter-btn <%= selectedCategory === 'all' ? 'active' : '' %>">All</a>
+                <a href="/shop?category=Clothing" class="filter-btn <%= selectedCategory === 'Clothing' ? 'active' : '' %>">Clothing</a>
+                <a href="/shop?category=Footwear" class="filter-btn <%= selectedCategory === 'Footwear' ? 'active' : '' %>">Footwear</a>
+                <a href="/shop?category=Accessories" class="filter-btn <%= selectedCategory === 'Accessories' ? 'active' : '' %>">Accessories</a>
+                <a href="/shop?category=Electronics" class="filter-btn <%= selectedCategory === 'Electronics' ? 'active' : '' %>">Electronics</a>
+            </div>
+        </div>
+
+        <div class="product-grid">
+            <% products.forEach(product => { %>
+            <div class="product-card">
+                <div class="product-img"><%= product.image %></div>
+                <h3><%= product.name %></h3>
+                <p class="category"><%= product.category %></p>
+                <p class="price">$<%= product.price %></p>
+                <form method="POST" action="/add-to-cart">
+                    <input type="hidden" name="id" value="<%= product.id %>">
+                    <input type="hidden" name="name" value="<%= product.name %>">
+                    <input type="hidden" name="price" value="<%= product.price %>">
+                    <button type="submit" class="btn-add">Add to Cart</button>
+                </form>
+            </div>
+            <% }); %>
+        </div>
+
+        <% if (showCart && cart && cart.length > 0) { %>
+        <div class="cart-sidebar">
+            <h2>Your Cart</h2>
+            <% cart.forEach(item => { %>
+            <div class="cart-item">
+                <div>
+                    <strong><%= item.name %></strong><br>
+                    $<%= item.price %> x <%= item.quantity %>
+                </div>
+                <div>
+                    <form method="POST" action="/update-cart" style="display: inline;">
+                        <input type="hidden" name="id" value="<%= item.id %>">
+                        <input type="number" name="quantity" value="<%= item.quantity %>" min="0" style="width: 50px;" onchange="this.form.submit()">
+                    </form>
+                </div>
+            </div>
+            <% }); %>
+            <div class="cart-total">Total: $<%= cartTotal %></div>
+            <a href="/checkout" class="btn-primary" style="display: block; text-align: center;">Checkout</a>
+        </div>
+        <% } %>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 ShopMart</p>
+    </footer>
+
+    <script>
+        // Update cart count from API
+        fetch('/api/cart-count')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('cartCount').innerText = data.count || 0;
+            })
+            .catch(err => console.log('Error fetching cart count:', err));
+    </script>
+</body>
+</html>
